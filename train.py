@@ -1,14 +1,12 @@
 import os.path
-from pathlib import Path
 
 import joblib
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
+from config import model_path, data_path, normal_dataset_path, tuberculosis_dataset_path
 from utils.io import read_as_csv
 from utils.pre_processing import image_transforms, label_transforms
-
-base_dir = Path(__file__).resolve().parent
 
 
 def clean_transforms(transforms):
@@ -28,7 +26,7 @@ def clean_label_transforms(img_transforms, lbl_transforms):
 
 
 def get_file_path(file, label):
-    return os.path.join(base_dir, "data", "chest_database", "Normal" if (label == "Normal") else "Tuberculosis", file)
+    return os.path.join(normal_dataset_path if (label == "Normal") else tuberculosis_dataset_path, file)
 
 
 def train(data_root, train_csv, test_csv, model, checkpoint_path):
@@ -71,12 +69,6 @@ def train(data_root, train_csv, test_csv, model, checkpoint_path):
     # Save the model
     joblib.dump(clf, checkpoint_path)
 
-    # Load the model from the file
-    loaded_knn_model = joblib.load(checkpoint_path)
-
-    print(loaded_knn_model.predict(x_test))
-
 
 if __name__ == "__main__":
-    train(os.path.join(base_dir, "data"), "train.csv", "test.csv", KNeighborsClassifier,
-          os.path.join(base_dir, "model.h5"))
+    train(data_path, "train.csv", "test.csv", KNeighborsClassifier, model_path)
