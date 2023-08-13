@@ -50,8 +50,8 @@ if __name__ == "__main__":
     num_classes = 2  # TB and non-TB
 
     model = create_chexnet_model(input_shape, num_classes)
-
-    train_data_dir = 'path_to_train_data_directory'
+    
+    train_data_dir = 'data/train.csv'
     trained_model = train_model(model, train_data_dir, input_shape, num_classes)
 
     # Save the trained model

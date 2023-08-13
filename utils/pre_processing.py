@@ -4,6 +4,7 @@ import numpy as np
 #from os.path import join 
 #from viz.visualization import display_grid
 import os
+from utils.io import read_as_csv
 
 
 label_map={
@@ -16,7 +17,7 @@ index_to_label_dict= { index:label for label,index in label_map.items()}
 
 def image_transforms(file_name, label) -> np.ndarray:
     file_path = os.path.join(data_root, label, file_name)
-    array = read_image(file_path, "zoom", grayscale=True)
+    array = read_image(file_path, grayscale=True)
     flatten_image = array.flatten()
     return flatten_image
 
@@ -38,7 +39,7 @@ def index_to_label( inx:int):
 
  
 
-def read_image(image_path: str,mode:str,size:tuple=(256,256), grayscale:bool = False) ->np.ndarray:
+def read_image(image_path: str,size:tuple=(256,256), grayscale:bool = False) ->np.ndarray:
     """ reads image from the given path and returns as a numpy array
     TODO: resize the image and implement the mode of zoom or paddding 
     args:
@@ -52,25 +53,25 @@ def read_image(image_path: str,mode:str,size:tuple=(256,256), grayscale:bool = F
     #image= image.resize(size)
     height, width= image.size
   
-    if mode == "padding":
-       if height== width:
-         pass
-       else:
-        image=ImageOps.pad(image, (256, 256), color=None, centering=(0.5, 0.5))
+    # if mode == "padding":
+    #    if height== width:
+    #      pass
+    #    else:
+    #     image=ImageOps.pad(image, (256, 256), color=None, centering=(0.5, 0.5))
     
-    if mode== "zoom":
-        diff= height-width
-        if diff>0:
-            right = width
-            (left, upper, right, lower) = (0, diff//2, right, height-(diff//2))
-            image= image.crop((left, upper, right, lower))
+    # if mode== "zoom":
+    #     diff= height-width
+    #     if diff>0:
+    #         right = width
+    #         (left, upper, right, lower) = (0, diff//2, right, height-(diff//2))
+    #         image= image.crop((left, upper, right, lower))
            
              
-        else:
-            lower= height
-            diff = abs(diff)
-            (left, upper, right, lower) = (diff//2, 0, width-(diff//2), lower)
-            image = image.crop((left, upper, right, lower))
+    #     else:
+    #         lower= height
+    #         diff = abs(diff)
+    #         (left, upper, right, lower) = (diff//2, 0, width-(diff//2), lower)
+    #         image = image.crop((left, upper, right, lower))
      
     image = image.resize((256,256))     
     img_array= np.asarray(image)
@@ -79,8 +80,17 @@ def read_image(image_path: str,mode:str,size:tuple=(256,256), grayscale:bool = F
       
        
 if __name__ == "__main__":
-  index = label_to_index("Normal")
-  print(index)
-  
-  value= index_to_label(1)
-  print(value)
+
+
+  data= "./data"
+  train_path = os.path.join(data, "train.csv")
+  train_files, train_labels = read_as_csv(train_path)
+  print(train_files, train_labels)
+  # zipped = zip(train_files, train_labels)
+  # for file, label in zipped:
+  #    print(file)
+  #    print(label)
+  X_train = np.array(
+       [image_transforms(file, label) for file, label in zip(train_files, train_labels)]
+  )
+  print("Flattened image lengths in X_train:", [len(image) for image in X_train])

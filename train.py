@@ -9,7 +9,7 @@ from config  import  MODEL_CHECKPOINT_PATH
 from utils.pre_processing import image_transforms, label_transforms
 
 
-data_root = "data"
+
 
 def train(data_root, train_csv, test_csv, model, checkpoint_path):
 # load csv
@@ -22,7 +22,9 @@ def train(data_root, train_csv, test_csv, model, checkpoint_path):
     X_train = np.array(
         [image_transforms(file, label) for file, label in zip(train_files, train_labels)]
     )
-    # print(X_train)
+    print("Flattened image lengths in X_train:", [len(image) for image in X_train])
+    
+
     Y_train = np.array([label_transforms(lab) for lab in train_labels])
 
     X_test = np.array(
@@ -49,7 +51,7 @@ def train(data_root, train_csv, test_csv, model, checkpoint_path):
 
     # print(loaded_knn_model.predict(X_test))
     
-if __name__ == "__main__":
+#if __name__ == "__main__":
    
     
-    train(data_root , "train.csv", "test.csv", KNeighborsClassifier, MODEL_CHECKPOINT_PATH)
+    #train(data_root , "train.csv", "test.csv", KNeighborsClassifier, MODEL_CHECKPOINT_PATH)
