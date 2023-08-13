@@ -5,7 +5,7 @@ import numpy as np
 #from viz.visualization import display_grid
 import os
 from utils.io import read_as_csv
-
+import cv2
 
 label_map={
   "Normal":1,
@@ -15,10 +15,22 @@ label_map={
 data_root = "data/tuber_dataset"
 index_to_label_dict= { index:label for label,index in label_map.items()}
 
+# def resize_image(image_array, target_shape):
+#     image = Image.fromarray(image_array)
+#     resized_image = image.resize(target_shape, 'Image.ANTIALIAS')
+#     resized_array = np.array(resized_image)
+#     return resized_array
+
+def resize_image(image_array, target_shape):
+    resized_image = cv2.resize(image_array, target_shape, interpolation=cv2.INTER_LINEAR)
+    return resized_image
+
 def image_transforms(file_name, label) -> np.ndarray:
     file_path = os.path.join(data_root, label, file_name)
     array = read_image(file_path, grayscale=True)
+    resized_array = resize_image(array, target_shape=(256, 256))
     flatten_image = array.flatten()
+    print(len(flatten_image))
     return flatten_image
 
 
@@ -73,7 +85,7 @@ def read_image(image_path: str,size:tuple=(256,256), grayscale:bool = False) ->n
     #         (left, upper, right, lower) = (diff//2, 0, width-(diff//2), lower)
     #         image = image.crop((left, upper, right, lower))
      
-    image = image.resize((256,256))     
+    #image = image.resize((256,256))     
     img_array= np.asarray(image)
     return img_array
 
@@ -93,4 +105,4 @@ if __name__ == "__main__":
   X_train = np.array(
        [image_transforms(file, label) for file, label in zip(train_files, train_labels)]
   )
-  print("Flattened image lengths in X_train:", [len(image) for image in X_train])
+  
