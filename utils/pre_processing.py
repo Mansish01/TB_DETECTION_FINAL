@@ -4,7 +4,7 @@ import numpy as np
 #from os.path import join 
 #from viz.visualization import display_grid
 import os
-from utils.io import read_as_csv
+# from utils.io import read_as_csv
 import cv2
 
 label_map={
@@ -21,16 +21,27 @@ index_to_label_dict= { index:label for label,index in label_map.items()}
 #     resized_array = np.array(resized_image)
 #     return resized_array
 
-def resize_image(image_array, target_shape):
-    resized_image = cv2.resize(image_array, target_shape, interpolation=cv2.INTER_LINEAR)
-    return resized_image
+# def resize_image(image_array, target_shape):
+#     resized_image = cv2.resize(image_array, target_shape, interpolation=cv2.INTER_LINEAR)
+#     return resized_image
+
+
+def resize_image(image_array, target_size=(256, 256,3)):
+    image = Image.fromarray(image_array)
+    image = image.resize(target_size[:2])
+    resized_array = np.array(image)
+    return resized_array
 
 def image_transforms(file_name, label) -> np.ndarray:
     file_path = os.path.join(data_root, label, file_name)
-    array = read_image(file_path, grayscale=True)
-    resized_array = resize_image(array, target_shape=(256, 256))
-    flatten_image = array.flatten()
-    print(len(flatten_image))
+    array = read_image(file_path,"padding", grayscale=True)
+    #print(array.shape)
+    # new_resized_array = resize_image(array)
+    
+    #print(new_resized_array.shape)
+    flatten_image =array.flatten()
+    
+    # print(len(flatten_image))
     return flatten_image
 
 
@@ -51,7 +62,7 @@ def index_to_label( inx:int):
 
  
 
-def read_image(image_path: str,size:tuple=(256,256), grayscale:bool = False) ->np.ndarray:
+def read_image(image_path: str,mode:str,size:tuple=(256,256), grayscale:bool = False) ->np.ndarray:
     """ reads image from the given path and returns as a numpy array
     TODO: resize the image and implement the mode of zoom or paddding 
     args:
@@ -65,44 +76,52 @@ def read_image(image_path: str,size:tuple=(256,256), grayscale:bool = False) ->n
     #image= image.resize(size)
     height, width= image.size
   
-    # if mode == "padding":
-    #    if height== width:
-    #      pass
-    #    else:
-    #     image=ImageOps.pad(image, (256, 256), color=None, centering=(0.5, 0.5))
+    if mode == "padding":
+       if height== width:
+         pass
+       else:
+        image=ImageOps.pad(image, (256, 256), color=None, centering=(0.5, 0.5))
     
-    # if mode== "zoom":
-    #     diff= height-width
-    #     if diff>0:
-    #         right = width
-    #         (left, upper, right, lower) = (0, diff//2, right, height-(diff//2))
-    #         image= image.crop((left, upper, right, lower))
+    if mode== "zoom":
+        diff= height-width
+        if diff>0:
+          right = width
+          (left, upper, right, lower) = (0, diff//2, right, height-(diff//2))
+          image= image.crop((left, upper, right, lower))
            
              
-    #     else:
-    #         lower= height
-    #         diff = abs(diff)
-    #         (left, upper, right, lower) = (diff//2, 0, width-(diff//2), lower)
-    #         image = image.crop((left, upper, right, lower))
+        else:
+            lower= height
+            diff = abs(diff)
+            (left, upper, right, lower) = (diff//2, 0, width-(diff//2), lower)
+            image = image.crop((left, upper, right, lower))
      
-    #image = image.resize((256,256))     
+    image = image.resize((256,256))     
     img_array= np.asarray(image)
+
     return img_array
 
       
        
 if __name__ == "__main__":
 
-
+  X_train=[]
   data= "./data"
   train_path = os.path.join(data, "train.csv")
   train_files, train_labels = read_as_csv(train_path)
-  print(train_files, train_labels)
+  #print(train_files, train_labels)
   # zipped = zip(train_files, train_labels)
   # for file, label in zipped:
   #    print(file)
   #    print(label)
-  X_train = np.array(
-       [image_transforms(file, label) for file, label in zip(train_files, train_labels)]
-  )
-  
+
+  # X_train = np.array(
+  #      [image_transforms(file, label) for file, label in zip(train_files, train_labels)]
+  # )
+  for file, label in zip(train_files, train_labels):
+        flatten_image = image_transforms(file, label)
+        if len(flatten_image) !=  65536:
+          print(len(flatten_image))
+          X_train.append(flatten_image)
+
+  X_train = np.array(X_train)
