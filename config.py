@@ -1,0 +1,1 @@
+MODEL_CHECKPOINT_PATH= "models/model.h5"
