@@ -6,6 +6,8 @@ import numpy as np
 # from os.path import join
 # from viz.visualization import display_grid
 import os
+
+from config import normal_dataset_path, tuberculosis_dataset_path
 from utils.io import read_as_csv
 
 label_map = {
@@ -15,6 +17,26 @@ label_map = {
 
 data_root = "data/chest_database"
 index_to_label_dict = {index: label for label, index in label_map.items()}
+
+
+def get_file_path(file, label):
+    return os.path.join(normal_dataset_path if (label == "Normal") else tuberculosis_dataset_path, file)
+
+
+def clean_transforms(transforms):
+    cleaned_transforms = []
+    for transform in transforms:
+        if transform.size == transforms[0].size:
+            cleaned_transforms.append(transform)
+    return cleaned_transforms
+
+
+def clean_label_transforms(img_transforms, lbl_transforms):
+    cleaned_transforms = []
+    for index, values in enumerate(img_transforms):
+        if values.size == img_transforms[0].size:
+            cleaned_transforms.append(lbl_transforms[index])
+    return cleaned_transforms
 
 
 def image_transforms(file_path, label) -> np.ndarray:
